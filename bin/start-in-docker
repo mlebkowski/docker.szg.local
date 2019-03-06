@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+TRAEFIK_CONTAINER_NAME=szg_traefik_1
+
+get_traefik_url() {
+    docker inspect "$TRAEFIK_CONTAINER_NAME" 2>/dev/null \
+        | jq -r '(.|first).Config.Labels["szg.url"] //""' 2>/dev/null
+}
+
+main() {
+    local traefik_url=$(get_traefik_url)
+
+    if [[ -z "$traefik_url" ]]; then
+        echo "I cant find traefik container. Are you sure you have the infrastructure running?" >&2
+        echo "https://github.com/syzygypl/mac-setup/blob/master/docker/Readme.md >&2
+        return 1
+    fi
+
+    echo "Starting the project using docker compose" >&2
+    docker-compose up -d
+
+    docker-compose ps
+
+    echo "##"
+    echo "## Registered hosts:"
+    echo "##"
+
+    declare project_name=$(basename "$(pwd)")
+    curl -s ${traefik_url}/api \
+        | jq --arg NAME "$project_name" -r '.docker.frontends 
+            | map(.routes | map(.rule[5:])) 
+            | map (.[])
+            | map ("http://" + .) 
+            | .[]
+            | select(.|contains($NAME))
+        '
+}
+
+main "$@"
