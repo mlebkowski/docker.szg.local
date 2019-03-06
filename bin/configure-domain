@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+ENV_FILE=".env"
+ENV_NAME="DOMAIN_SUFFIX"
+DEFAULT_NAME=dev
+
+main() {
+    if grep -q "$ENV_NAME" "$ENV_FILE" 2>/dev/null; then
+        return;
+    fi
+
+    read -p "Enter local domain name [$DEFAULT_NAME]: " domain
+    domain=${domain:-$DEFAULT_NAME}
+
+    echo "${ENV_NAME}=${domain}" >> "$ENV_FILE"
+
+    echo "You will be prompted for root password to configure your DNS resolver"
+    echo "nameserver 127.0.0.1" | sudo tee "/etc/resolver/$domain"
+    sudo killall -HUP mDNSResponder
+
+    if [[ $(dig @127.0.0.1 "szg.$domain" +short) != "127.0.0.1" ]]; then
+        echo "Error resolving szg.$domain to localhost, pls check your settings" >&2
+        return 1
+    fi
+}
+
+main "$@"

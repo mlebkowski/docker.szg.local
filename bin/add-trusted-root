@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+ROOT_CERT_PATH="nassau-https-proxy/data/ssl.proxy.nassau.narzekasz.pl.crt"
+SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
+
+get_cert_sha() {
+    openssl x509 -noout -fingerprint -sha1 -inform pem -in "$ROOT_CERT_PATH" | cut -b 18-
+}
+
+format_cert_sha() {
+    sed -n -e 's/SHA-1 hash: //p' | sed -e 's/\(..\)/\1:/g' -e 's/:$//'
+}
+
+find_existing_root() {
+    declare cert_name="$1"
+
+    security find-certificate -a -c "$cert_name" -Z "$SYSTEM_KEYCHAIN" | format_cert_sha
+}
+
+main() {
+    if [[ ! -f "$ROOT_CERT_PATH" ]]; then
+        echo "Expected the cert to be located at $ROOT_CERT_PATH" >&2
+        return 1
+    fi
+
+    local expected_sha=$(get_cert_sha)
+
+    local cert_name=$(basename "$ROOT_CERT_PATH" ".crt")
+    local actual_sha=$(find_existing_root "$cert_name")
+
+    if [[ "$expected_sha" == "$actual_sha" ]]; then
+        return
+    fi
+
+    echo "You will be prompted for root password to add root certificate for HTTPS"
+    echo sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" $ROOT_CERT_PATH
+}
+
+main "$@"
