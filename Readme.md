@@ -5,24 +5,20 @@
  * [Mailhog](https://mailhog.szg.dev)
  * [Portainer](https://portainer.szg.dev)
 
+## Instalation
+
+1. Make sure you have installed:
+  * Docker for Mac
+  *`jq` (`brew install jq`)
+2. Add `bin/` to your path
+3. run `make`
+
 ## Services
 
  * Mysql: `docker.for.mac.localhost:3306` or `localhost:3306`
  * Redis: `docker.for.mac.localhost:6379` or `localhost:6379`
  * Elasticsearch 1.7: `docker.for.mac.localhost:9200` or `elasticsearch.dev`
  * SMTP server (mailhog): `docker.for.mac.localhost:1025` or `localhost:1025`
-
-## Accepting Root certificate
-
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain nassau-https-proxy/data/ssl.proxy.nassau.narzekasz.pl.crt
-
-## Configuring resolver
-
-    # https://github.com/chulkilee/dev-docker/blob/master/scripts/add-resolver.sh
-
-    echo "nameserver 127.0.0.1" | sudo tee /etc/resolver/test /etc/resolver/dev /etc/resolver/consul
-    sudo killall -HUP mDNSResponder
-
 
 ## Run one-off in docker
 
@@ -32,6 +28,20 @@ run-in-docker php -v
 
 The command will preserve the current working dir relative to the project root, and choose the best image
 basing on the command you want to invoke (see `io.szg.dev.commands` label below)
+
+
+## Start your project with all dependencies
+
+```
+start-in-docker
+```
+
+This simple wrapper on `docker-compose` is best suited for the first run:
+
+ * it installs all of the dependencies
+ * makes sure that the infrastructure project is running
+ * runs mutagen or other daemons if need be
+ * etc
 
 ## Expose your local environment 
 
