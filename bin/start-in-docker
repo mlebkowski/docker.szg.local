@@ -12,7 +12,7 @@ main() {
 
     if [[ -z "$traefik_url" ]]; then
         echo "I cant find traefik container. Are you sure you have the infrastructure running?" >&2
-        echo "https://github.com/syzygypl/mac-setup/blob/master/docker/Readme.md >&2
+        echo "https://github.com/syzygypl/docker.szg.local/blob/master/Readme.md" >&2
         return 1
     fi
 
