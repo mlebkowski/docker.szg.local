@@ -4,6 +4,7 @@ services:
   traefik:
     image: traefik
     restart: unless-stopped
+    command: traefik --docker.domain=$DOMAIN_SUFFIX
     ports:
       - "80:80"
     volumes:
@@ -11,6 +12,7 @@ services:
       - ./traefik/config.toml:/etc/traefik/traefik.toml
     labels:
       - "traefik.port=8080"
+      - "szg.url=http://traefik.szg.$DOMAIN_SUFFIX"
 
   nassau-https-proxy:
     build: ./nassau-https-proxy
@@ -59,7 +61,7 @@ services:
   dnsmasq:
     image: andyshinn/dnsmasq
     restart: unless-stopped
-    command: --log-facility=- --log-queries --address=/test/127.0.0.1 --address=/dev/127.0.0.1
+    command: --log-facility=- --log-queries --address=/$DOMAIN_SUFFIX/127.0.0.1 
     ports:
      - "53:53"
      - "53:53/udp"
