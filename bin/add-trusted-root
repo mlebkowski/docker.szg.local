@@ -33,7 +33,7 @@ main() {
     fi
 
     echo "You will be prompted for root password to add root certificate for HTTPS"
-    echo sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" $ROOT_CERT_PATH
+    sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" $ROOT_CERT_PATH
 }
 
 main "$@"
