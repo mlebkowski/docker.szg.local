@@ -16,6 +16,18 @@ main() {
         return 1
     fi
 
+    if [[ ! -d 'vendor' ]]; then
+        run-in-docker composer install
+    fi
+
+    if [[ ! -d 'node_modules' ]]; then
+        if [[ -f 'yarn.lock' ]]; then
+            run-in-docker yarn
+        else
+            run-in-docker npm i
+        fi
+    fi
+
     echo "Starting the project using docker compose" >&2
     docker-compose up -d
 
