@@ -1,7 +1,7 @@
 authtoken: {{ .Env.NGROK_AUTH }}
 region: {{ or .Env.NGROK_REGION "eu" }}
 console_ui: false
-inspect_db_size: 50000005
+inspect_db_size: 50000000
 web_addr: 0.0.0.0:4040
 tunnels:
 {{ $hostname := .Env.NGROK_HOSTNAME }}
@@ -21,10 +21,11 @@ tunnels:
 
     {{ $project := index $value.Labels "com.docker.compose.project" }}
     {{ $service := or (index $value.Labels "io.szg.ngrok.host") (index $value.Labels "com.docker.compose.service") }}
+    {{ $subdomain := or (index $value.Labels "io.szg.ngrok.subdomain") (printf "%v-%v" $service $project) }}
     {{ if $hostname }}
-    hostname: {{ $service }}-{{ $project }}.{{ $hostname }}
+    hostname: {{ $subdomain }}.{{ $hostname }}
     {{ else }}
-    subdomain: {{ $service }}-{{ $project }}
+    subdomain: {{ $subdomain }}
     {{ end }}
 
   {{ end }}
