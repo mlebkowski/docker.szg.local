@@ -25,17 +25,26 @@ services:
      - "SERVICE_443_NAME=https"
      - "traefik.enable=false"
 
-  whoami1:
-    image: emilevauge/whoami
-    labels:
-      - "traefik.frontend.rule=Host:whoami.dev"
-      - "traefik.backend=whoami"
+  ngrok:
+    image: wernight/ngrok
+    command: start --config /etc/ngrok/ngrok.yml --all
+    entrypoint: [ ngrok ]
+    restart: always
+    volumes:
+      - ./ngrok:/etc/ngrok/
 
-  whoami2:
-    image: emilevauge/whoami
+  ngrok-gen:
+    image: mlebkowski/docker-gen
+    command: -notify "restart-container ${COMPOSE_PROJECT_NAME}_ngrok_1" -watch -only-exposed /etc/ngrok/ngrok.tmpl /etc/ngrok/ngrok.yml
+    volumes:
+      - ./ngrok:/etc/ngrok
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      - NGROK_AUTH
+      - NGROK_HOSTNAME
+      - NGROK_REGION
     labels:
-      - "traefik.frontend.rule=Host:whoami.dev"
-      - "traefik.backend=whoami"
+      - "traefik.enabled=false"
 
   consul:
     image: consul:0.9.3

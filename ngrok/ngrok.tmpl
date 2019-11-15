@@ -1,0 +1,31 @@
+authtoken: {{ .Env.NGROK_AUTH }}
+region: {{ or .Env.NGROK_REGION "eu" }}
+console_ui: false
+inspect_db_size: 50000005
+web_addr: 0.0.0.0:4040
+tunnels:
+{{ $hostname := .Env.NGROK_HOSTNAME }}
+{{ range $index, $value := $ }}
+{{ $enabled := contains $value.Labels "io.szg.ngrok" }}
+{{ if $enabled }}
+  {{ $value.Name }}:
+    proto: http
+    {{ $addr := index $value.Addresses 0 }}
+    {{ $ip := or $addr.IP (index $value.Networks 0).IP }}
+    {{ $port := or $addr.Port 80 }}
+    addr: {{ $ip }}:{{ $port }}
+    {{ $auth := index $value.Labels "io.szg.ngrok.auth" }}
+    {{ if $auth }}
+    auth: {{ $auth }}
+    {{ end }}
+
+    {{ $project := index $value.Labels "com.docker.compose.project" }}
+    {{ $service := or (index $value.Labels "io.szg.ngrok.host") (index $value.Labels "com.docker.compose.service") }}
+    {{ if $hostname }}
+    hostname: {{ $service }}-{{ $project }}.{{ $hostname }}
+    {{ else }}
+    subdomain: {{ $service }}-{{ $project }}
+    {{ end }}
+
+  {{ end }}
+{{ end }}
