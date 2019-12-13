@@ -27,6 +27,7 @@ services:
 
   ngrok:
     image: wernight/ngrok
+    restart: unless-stopped
     command: start --config /etc/ngrok/ngrok.yml --all
     entrypoint: [ ngrok ]
     volumes:
@@ -34,6 +35,7 @@ services:
 
   ngrok-gen:
     image: mlebkowski/docker-gen
+    restart: unless-stopped
     command: -config /etc/ngrok/docker-gen.conf
     volumes:
       - ./ngrok:/etc/ngrok
