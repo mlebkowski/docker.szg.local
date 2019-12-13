@@ -1,0 +1,14 @@
+api:
+  dashboard: true
+entryPoints:
+  http:
+    address: :80
+providers:
+  providersThrottleDuration: 2s
+  docker:
+    defaultRule: >
+        Host(`{{index .Labels "com.docker.compose.service"}}.{{index .Labels "com.docker.compose.project"}}.{{ env "DOMAIN_SUFFIX" }}`)
+    watch: true
+    exposedByDefault: true
+log:
+  level: DEBUG

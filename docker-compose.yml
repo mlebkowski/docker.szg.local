@@ -2,16 +2,19 @@ version: "3"
 
 services:
   traefik:
-    image: traefik
+    image: traefik:2.1
     restart: unless-stopped
-    command: traefik --docker.domain=$DOMAIN_SUFFIX
+    command: traefik
     ports:
       - "80:80"
+    environment:
+      - DOMAIN_SUFFIX
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik/config.toml:/etc/traefik/traefik.toml
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
     labels:
       - "traefik.port=8080"
+      - "traefik.http.routers.api.service=api@internal"
       - "szg.url=http://traefik.szg.$DOMAIN_SUFFIX"
 
   nassau-https-proxy:
