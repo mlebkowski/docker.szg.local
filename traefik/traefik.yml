@@ -5,6 +5,11 @@ entryPoints:
     address: :80
 providers:
   providersThrottleDuration: 2s
+  consulCatalog:
+    defaultRule: >
+        Host(`{{ .Name }}.{{ env "DOMAIN_SUFFIX" }}`)
+    endpoint:
+      address: http://host.docker.internal:8500
   docker:
     defaultRule: >
         Host(`{{index .Labels "com.docker.compose.service"}}.{{index .Labels "com.docker.compose.project"}}.{{ env "DOMAIN_SUFFIX" }}`)

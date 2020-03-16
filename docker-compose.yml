@@ -52,6 +52,7 @@ services:
 
   consul:
     image: consul:0.9.3
+    restart: unless-stopped
     ports:
       - "8300:8300"
       - "8400:8400"
@@ -64,12 +65,13 @@ services:
       - "8302"
       - "8302/udp"
     labels:
-      - "traefik.port=8500"
-      - "SERVICE_53_IGNORE=yes"
-      - "SERVICE_8300_IGNORE=yes"
-      - "SERVICE_8301_IGNORE=yes"
-      - "SERVICE_8302_IGNORE=yes"
-      - "SERVICE_8400_IGNORE=yes"
+      - "traefik.http.services.consul-szg.loadbalancer.server.port=8500"
+      - "SERVICE_53_IGNORE=true"
+      - "SERVICE_8500_NAME=ui.consul"
+      - "SERVICE_8300_IGNORE=true"
+      - "SERVICE_8301_IGNORE=true"
+      - "SERVICE_8302_IGNORE=true"
+      - "SERVICE_8400_IGNORE=true"
 
   dnsmasq:
     image: andyshinn/dnsmasq
@@ -85,7 +87,7 @@ services:
       - NET_ADMIN
 
   registrator:
-    image: gliderlabs/registrator:master
+    image: gliderlabs/registrator:latest
     command: -internal consul://consul:8500
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
@@ -96,8 +98,9 @@ services:
     image: mailhog/mailhog:latest
     ports:
       - 8025
+      - 1025:1025
     labels:
-      - "traefik.port=8025"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
       - "SERVICE_1025_NAME=smtp"
       - "SERVICE_8025_NAME=mailhog"
 
