@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -ueo pipefail
+
+main() {
+    declare name="${1:-}" port="${2:-80}"
+
+    if [ -z "$name" ]; then
+        echo "Usage: $0 <name> [<port = 80>]" >&2
+        return 1
+    fi
+
+    local suffix="${DOMAIN_SUFFIX:-dev}"
+
+    if ! [[ "$name" = *.* ]]; then
+        name=$name.${COMPOSE_PROJECT_NAME:-$(basename "$(pwd)")}
+    fi
+
+    name=${name%".${suffix}"}
+
+    local payload=$(jq -Rn --arg name "$name" --arg port "$port" '{
+        name: $name,
+        address: "host.docker.internal",
+        port: $port|tonumber
+    }');
+
+    curl -fX "PUT" "http://consul.szg.${suffix}/v1/agent/service/register" -d "$payload"
+    echo "https://$name.$suffix → http://localhost:$port"
+}
+
+main "$@"
